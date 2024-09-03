@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: django-app
+    env: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn aiblog_app.wsgi:application
+    instanceType: t2.medium
+    healthCheckPath: /
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: aiblog_app.settings
+      - key: ALLOWED_HOSTS
+        value: aiblogfinal.onrender.com
+    static:
+      - path: /static/
+        localPath: /staticfiles/
