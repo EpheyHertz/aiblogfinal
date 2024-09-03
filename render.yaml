@@ -12,7 +12,7 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: aiblog_app.settings
       - key: SECRET_KEY
-        value: ${SECRET_KEY}  # Set this securely in the Render dashboard
+        value: ${SECRET_KEY}
       - key: EMAIL_HOST
         value: smtp.gmail.com
       - key: EMAIL_PORT
@@ -20,15 +20,15 @@ services:
       - key: EMAIL_USE_TLS
         value: 'True'
       - key: EMAIL_HOST_USER
-        value: ${EMAIL_HOST_USER}  # Set this securely in the Render dashboard
+        value: ${EMAIL_HOST_USER}
       - key: EMAIL_HOST_PASSWORD
-        value: ${EMAIL_HOST_PASSWORD}  # Set this securely in the Render dashboard
+        value: ${EMAIL_HOST_PASSWORD}
       - key: CONTACT_EMAIL
-        value: ${CONTACT_EMAIL}  # Set this securely in the Render dashboard
+        value: ${CONTACT_EMAIL}
       - key: GEMINI_API_KEY
-        value: ${GEMINI_API_KEY}  # Set this securely in the Render dashboard
+        value: ${GEMINI_API_KEY}
       - key: AAI_API_KEY
-        value: ${AAI_API_KEY}  # Set this securely in the Render dashboard
+        value: ${AAI_API_KEY}
       - key: ALLOWED_HOSTS
         value: aiblogfinal.onrender.com
     static:
