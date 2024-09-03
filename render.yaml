@@ -2,13 +2,33 @@ services:
   - type: web
     name: django-app
     env: python
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
     startCommand: gunicorn aiblog_app.wsgi:application
     instanceType: t2.medium
     healthCheckPath: /
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: aiblog_app.settings
+      - key: SECRET_KEY
+        value: ${SECRET_KEY}  # Set this securely in the Render dashboard
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: '587'
+      - key: EMAIL_USE_TLS
+        value: 'True'
+      - key: EMAIL_HOST_USER
+        value: ${EMAIL_HOST_USER}  # Set this securely in the Render dashboard
+      - key: EMAIL_HOST_PASSWORD
+        value: ${EMAIL_HOST_PASSWORD}  # Set this securely in the Render dashboard
+      - key: CONTACT_EMAIL
+        value: ${CONTACT_EMAIL}  # Set this securely in the Render dashboard
+      - key: GEMINI_API_KEY
+        value: ${GEMINI_API_KEY}  # Set this securely in the Render dashboard
+      - key: AAI_API_KEY
+        value: ${AAI_API_KEY}  # Set this securely in the Render dashboard
       - key: ALLOWED_HOSTS
         value: aiblogfinal.onrender.com
     static:
