@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-rn#n+*yldmwe&x)(1-4*^+uf2+68m0*1-8zwc=!3e$-9n9av@p
 DEBUG = False
 
 ALLOWED_HOSTS = ['aiblogfinal.onrender.com']
+# ALLOWED_HOST=[]
 # settings.py
 
 AUTHENTICATION_BACKENDS = [
