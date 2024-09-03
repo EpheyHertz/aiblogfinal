@@ -1,4 +1,4 @@
-
+import filetype
 import logging
 import os
 import json
@@ -12,6 +12,11 @@ from django.http import JsonResponse
 from pytube import YouTube
 from django.conf import settings
 import assemblyai as aai
+from moviepy.editor import VideoFileClip
+from django.core.mail import EmailMessage
+import time
+import httpx
+from django.shortcuts import render
 
 import google.generativeai as genai
 from .models import BlogPost
@@ -23,11 +28,56 @@ logging.basicConfig(level=logging.DEBUG)
 # Create your views here.
 def home(request):
     return render(request, 'index.html')
+@csrf_exempt
+@login_required
+def contact(request):
+    # Retrieve the authenticated user's email
+    user_email = request.user.email if request.user.is_authenticated else ''
 
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        # Debugging output
+        #print(f"Received email: {email}, name: {name}, message: {message}")
+
+        # Validate form data (basic example)
+        if not name or not email or not message:
+            return JsonResponse({'error': 'All fields are required.'}, status=400)
+
+        # Send email logic
+        from_email = settings.DEFAULT_FROM_EMAIL
+        to_email = [settings.CONTACT_EMAIL]
+        subject = f'Contact Form Submission from {name}'
+        body = f'Name: {name}\nEmail: {email}\n\nMessage:\n{message}'
+
+        try:
+            email_message = EmailMessage(subject, body, from_email, to_email)
+            email_message.send()
+            return JsonResponse({'message': f'Thank you, {name}! Your message has been sent.'})
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            return JsonResponse({'error': 'Something went wrong. If this persists, try sending your email to "epheynyaga@gmail.com". Sorry for the inconvenience.'}, status=500)
+
+    # Render the contact page and pass the user's email
+    return render(request, 'contact.html', {'user_email': user_email})
 @login_required
 def dashboard(request):
     return render(request, 'home.html')
 
+
+
+@csrf_exempt
+def is_video_file(file):
+    try:
+        kind = filetype.guess(file.read())
+        file.seek(0)  # Reset file pointer to the start
+        return kind and kind.mime.startswith('video/')
+    except Exception as e:
+        logging.error(f"Error determining file type: {e}", exc_info=True)
+        return False
+@login_required
 @csrf_exempt
 def generate_blog(request):
     if request.method == 'POST':
@@ -35,41 +85,110 @@ def generate_blog(request):
             youtube_link = request.POST.get('youtube_link')
             file = request.FILES.get('file')
 
-            if not youtube_link:
-                return JsonResponse({'error': 'YouTube link is required'}, status=400)
+            if youtube_link:
+                # Handle YouTube link
+                title = yt_title(youtube_link)
 
-            # Get the YouTube video title
-            title = yt_title(youtube_link)
+                # Get the transcription from the YouTube video
+                transcription = get_transcription(youtube_link)
+                if not transcription:
+                    return JsonResponse({'error': 'Failed to get transcription'}, status=500)
 
-            # Get the transcript
-            transcription = get_transcription(youtube_link)
-            if not transcription:
-                return JsonResponse({'error': 'Failed to get transcription'}, status=500)
+                # Generate the blog content
+                blog_content = generate_blog_from_transcription(transcription)
+                if not blog_content:
+                    return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
 
-            # Generate the blog content
-            blog_content = generate_blog_from_transcription(transcription)
-            if not blog_content:
-                return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
-            
-            new_blog_article = BlogPost.objects.create(
-                user=request.user,
-                youtube_title= title,
-                youtube_link=youtube_link,
-                generated_content= blog_content,
-            )
-            new_blog_article.save()
+                # Save the blog article
+                new_blog_article = BlogPost.objects.create(
+                    user=request.user,
+                    youtube_title=title,
+                    youtube_link=youtube_link,
+                    transcript=transcription,
+                    generated_content=blog_content
+                )
+                new_blog_article.save()
 
-            # Return blog article as response
+            elif file:
+                # Handle file upload (audio/video)
+                title = file.name
+                file_path = save_file(file)  # Custom function to save the file and return the path
+
+                # Check if the file is a video
+                if is_video_file(file):
+                    audio_file_path = extract_audio_from_video(file_path)  # Custom function to extract audio
+                else:
+                    audio_file_path = file_path
+
+                # Get the transcription from the file
+                transcription = get_transcription_from_file(audio_file_path)
+                if not transcription:
+                    return JsonResponse({'error': 'Failed to get transcription'}, status=500)
+
+                # Generate the blog content
+                blog_content = generate_blog_from_transcription(transcription)
+                if not blog_content:
+    # If no content was generated, set blog_content to a specific value
+                        blog_content = "Content could not be generated. Here is the transcription instead."
+
+    # Save the transcription to the database without generated content
+                        new_blog_article = BlogPost.objects.create(
+                            user=request.user,
+                            youtube_title=title,
+                            youtube_link=youtube_link if youtube_link else file_path,
+                            transcript=transcription,                     
+                            generated_content=blog_content
+                         )
+                        new_blog_article.save()
+
+    # Render the transcription to the frontend
+                        return JsonResponse({
+                            'message': 'Content generation failed. Transcription has been saved instead.',
+                            'transcription': transcription,
+                            'generated_content': blog_content
+                        })
+
+# Save the blog article with generated content
+                new_blog_article = BlogPost.objects.create(
+                    user=request.user,
+                    youtube_title=title,
+                     youtube_link=youtube_link if youtube_link else file_path,
+                    transcript=transcription,
+                    generated_content=blog_content
+                )
+                new_blog_article.save()
+
+
+
+            else:
+                return JsonResponse({'error': 'You must provide either a YouTube link or upload a file'}, status=400)
+
+            # Return the generated blog content as a response
             return JsonResponse({"content": blog_content})
 
         except (KeyError, json.JSONDecodeError) as e:
             logging.error(f"Error processing POST data: {e}")
             return JsonResponse({'error': 'Invalid data sent'}, status=400)
         except Exception as e:
-            logging.error(f"Unexpected error: {e}")
+            logging.error(f"Unexpected error: {e}", exc_info=True)
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def extract_audio_from_video(video_path):
+    try:
+        # Load the video file
+        video = VideoFileClip(video_path)
+
+        # Extract the audio
+        audio_path = video_path.rsplit('.', 1)[0] + '.mp3'
+        video.audio.write_audiofile(audio_path)
+
+        return audio_path
+
+    except Exception as e:
+        logging.error(f"Error extracting audio from video: {e}", exc_info=True)
+        return None
 
 def yt_title(link):
     try:
@@ -108,36 +227,15 @@ def download_audio(link):
     except Exception as e:
         logging.error(f"Error in download_audio function: {e}", exc_info=True)
         return None
-# def download_audio(link):
-#     try:
-#         yt = YouTube(link)
-#         logging.info(f"Successfully created YouTube object for link: {link}")
-
-#         # Filter audio streams and select the first one
-#         video = yt.streams.filter(only_audio=True).first()
-#         if not video:
-#             logging.error("No audio stream found for the video.")
-#             return None
-
-#         logging.info("Audio stream found, starting download.")
-        
-#         # Download the audio file
-#         out_file = video.download(output_path=settings.MEDIA_ROOT)
-#         logging.info(f"Audio downloaded successfully: {out_file}")
-
-#         # Rename the downloaded file
-#         base, ext = os.path.splitext(out_file)
-#         new_file = base + '.mp3'
-#         os.rename(out_file, new_file)
-#         logging.info(f"File renamed successfully: {new_file}")
-
-#         return new_file
-
-#     except Exception as e:
-#         logging.error(f"Error in download_audio function: {e}", exc_info=True)
-#         return None
 
 
+def save_file(file):
+    file_name = file.name
+    file_path = os.path.join('media/', file_name)
+    with open(file_path, 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+    return file_path
 
 def get_transcription(link):
     try:
@@ -145,7 +243,7 @@ def get_transcription(link):
         if not audio_file:
             return None
 
-        aai.settings.api_key = '22317c2fc4ab4cfd96f5a18a1c667418' # Use Django settings for API key
+        aai.settings.api_key =  settings.AAI_API_KEY # Use Django settings for API key
         transcriber = aai.Transcriber()
         transcript = transcriber.transcribe(audio_file)
         return transcript.text
@@ -153,72 +251,118 @@ def get_transcription(link):
     except Exception as e:
         logging.error(f"Error in get_transcription function: {e}", exc_info=True)
         return None
+    
+MAX_RETRIES = 5
+RETRY_DELAY = 5 
+    
+def get_transcription_from_file(file_path):
+    def transcribe_with_retries():
+        """Attempt to transcribe the file with retries."""
+        for attempt in range(MAX_RETRIES):
+            try:
+                with open(file_path, 'rb') as audio_file:
+                    transcript = transcriber.transcribe(audio_file)
+                return transcript.text
+            except httpx.WriteTimeout:
+                logging.warning(f"Write timeout, retrying ({attempt + 1}/{MAX_RETRIES})...")
+                time.sleep(RETRY_DELAY)
+            except Exception as e:
+                logging.error(f"Error during transcription attempt {attempt + 1}: {e}", exc_info=True)
+                if attempt == MAX_RETRIES - 1:
+                    raise  # Re-raise the exception if all retries are exhausted
+                time.sleep(RETRY_DELAY)
 
-def generate_blog_from_transcription(transcription):
+        logging.error("Failed to get transcription after several retries.")
+        return None
+
     try:
-        # Define your Google Gemini API key here
-        gemini_api_key = 'AIzaSyBPepAXsyXoRZHPixasP3RA0XiU_6O3_q4'
-        genai.configure(api_key=gemini_api_key)
+        if not os.path.exists(file_path):
+            logging.error(f"File not found: {file_path}")
+            return None
 
-        # Structure the transcription into a prompt
+        # Set the API key for the transcriber
+        aai.settings.api_key = settings.AAI_API_KEY
+        transcriber = aai.Transcriber()
+
+        # Retry the transcription process
+        transcript_text = transcribe_with_retries()
+        return transcript_text
+
+    except Exception as e:
+        logging.error(f"Error in get_transcription_from_file function: {e}", exc_info=True)
+        return None
+def generate_blog_from_transcription(transcription):
+    def generate_with_retries():
+        """Attempt to generate blog content with retries."""
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = model.generate_content(
+                    transcription_text,
+                    generation_config=generation_config
+                )
+                logging.info(f"Generation attempt {attempt + 1}/{MAX_RETRIES}: Response received.")
+                
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    if candidate.finish_reason == "SAFETY":
+                        logging.error("Content generation blocked due to safety concerns.")
+                        return "The content could not be generated as it was flagged for safety concerns."
+                    elif hasattr(candidate, 'content') and candidate.content.parts:
+                        generated_content = ''.join([part.text for part in candidate.content.parts])
+                        return generated_content
+                    else:
+                        logging.error("The response does not contain valid 'text' in the candidate.")
+                else:
+                    logging.error("The response does not contain valid 'candidates'.")
+                
+            except Exception as e:
+                logging.error(f"Error during generation attempt {attempt + 1}: {e}", exc_info=True)
+                if attempt == MAX_RETRIES - 1:
+                    raise
+                time.sleep(RETRY_DELAY)
+
+        logging.error("Failed to generate content after several retries.")
+        return "Content could not be generated due to repeated failures. Please try again later."
+
+    try:
+        gemini_api_key = settings.GEMINI_API_KEY 
+        genai.configure(api_key=gemini_api_key)
+        print(transcription)
+
         transcription_text = f"""
         Create a blog article from the provided transcript:
 
         {transcription}
         Structure the article as follows:
-        1.	Introduction
-	        Briefly introduce the main topic or theme of the discussion.
-       2.	Body:
-           	Summarize the content based on timestamps.
-        	For each timestamp, provide a concise summary or key points discussed.
-       3.	Conclusion:
-	        Summarize the key takeaways from the discussion.
-        Format:
-	        Use clear headings and subheadings for different timestamps.
-            Write in an engaging and professional tone.
-            Example of Input Transcript:
-                "00:00:00 - Introduction to AI 00:02:15 - Recent Technological Advances 00:05:30 - AI in Healthcare 00:08:45 - Ethical Issues 00:12:00 - Future Outlook"
-
-	
-
+        1. Introduction: Briefly introduce the main topic or theme of the discussion.
+        2. Body: Summarize the content based on timestamps.
+        3. Conclusion: Summarize the key takeaways from the discussion.
+        Format: Use clear headings and subheadings for different timestamps. 
+        Write in an engaging and professional tone.
         """
 
-        # # Define the endpoint and headers for Google Gemini API
-        # gemini_endpoint = "https://gemini.googleapis.com/v1beta1/projects/your-project-id/locations/your-location/gemini-text-generate"
-        # headers = {
-        #     "Authorization": f"Bearer {gemini_api_key}",
-        #     "Content-Type": "application/json"
-        # }
         model = genai.GenerativeModel('gemini-1.5-flash')
 
-        # Define the payload for the API request
         generation_config = genai.types.GenerationConfig(
-            candidate_count=1,          # Generate only one candidate
-            stop_sequences=["in Conclusion", "\n\n\n\n\n"],       # Stop sequence (adjust as needed)
-            max_output_tokens=1000,       # Set a limit on the output tokens
-            temperature=0.5             # Control the randomness (adjust as needed)
+            candidate_count=1,
+            stop_sequences=["in Conclusion", "\n\n\n\n\n"],
+            max_output_tokens=1000,
+            temperature=0.5
         )
 
-        # Generate content using the transcription text as the prompt
-        response = model.generate_content(
-            transcription_text,
-            generation_config=generation_config
-        )
-
-        # Extract the generated content
-        generated_content = response.text
-        print(generated_content)
-
+        # Retry the blog generation process
+        generated_content = generate_with_retries()
         return generated_content
 
     except Exception as e:
         logging.error(f"Error in generate_blog_from_transcription function: {e}", exc_info=True)
         return None
 
+@login_required
 def blog_list(request):
     blog_articles = BlogPost.objects.filter(user=request.user)
     return render(request,'allblogpost.html',{'blog_articles':blog_articles})
-
+@login_required
 def blog_details(request,pk):
     blog_article_detail = BlogPost.objects.get(id=pk)
     if request.user == blog_article_detail.user:
@@ -272,18 +416,28 @@ def user_signup(request):
                 error_message = 'Error occurred while registering the user. Please try again.'
                 return render(request, 'register.html', {'error_message': error_message})
 
+        else:
+            error_message = 'Passwords do not match.'
+            logging.warning(f"Password mismatch for email: {email}")
+            return render(request, 'register.html', {'error_message': error_message})
 
+    else:
+        # Handle GET request by rendering the signup form
+        return render(request, 'register.html')
 @login_required
 def user_logout(request):
     logout(request)
     return redirect('/login/')
-
+@login_required
+@csrf_exempt
 def delete_blog(request, blog_id):
     if request.method == 'POST':
         try:
             blog = get_object_or_404(BlogPost, id=blog_id)
             blog.delete()
-            return JsonResponse({"success": True, "message": "Blog deleted successfully"})
+            return redirect('/blog-posts/')
+            # return JsonResponse({"success": True, "message": "Blog deleted successfully"})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
-    return JsonResponse({"success": False, "message": "Invalid request method"})
+    # return JsonResponse({"success": False, "message": "Invalid request method"})
+    return redirect('/blog-posts/')

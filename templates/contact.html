@@ -13,11 +13,11 @@
         <h1>AI Blog Generator</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#about">About Us</a></li>
-                <li><a href="login.html" class="primary-btn">Login</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/#features">Features</a></li>
+                <li><a href="/#how-it-works">How It Works</a></li>
+                <li><a href="/#about">About Us</a></li>
+                <li><a href="/login/" class="primary-btn">Login</a></li>
             </ul>
         </nav>
     </header>
@@ -26,14 +26,16 @@
         <section id="contact">
             <h2>Contact Us</h2>
             <p>We'd love to hear from you! Please fill out the form below, and we'll get in touch with you as soon as possible.</p>
-            <form id="contact-form">
+            <form id="contact-form" action="/contact/" method="POST">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
                 <div class="form-group">
                     <label for="name">Name:</label>
                     <input type="text" id="name" name="name" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" value="{{user_email}}" readonly required>
                 </div>
                 <div class="form-group">
                     <label for="message">Message:</label>
@@ -48,11 +50,11 @@
     <footer>
         <p>&copy; 2024 AI Blog Generator. All rights reserved.</p>
         <div class="footer-links">
-            <a href="index.html">Home</a>
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#about">About Us</a>
-            <a href="contact.html">Contact</a>
+            <a href="/">Home</a>
+            <a href="/#features">Features</a>
+            <a href="/#how-it-works">How It Works</a>
+            <a href="/#about">About Us</a>
+            <a href="/contact/">Contact</a>
         </div>
     </footer>
 </body>

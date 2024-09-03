@@ -9,6 +9,39 @@
     <link rel="stylesheet" href="{% static 'bloggenerator/home.css' %}">
 </head>
 <body>
+    <style>
+        .contactbtn {
+    background-color: #007BFF; /* Button background color */
+    border: none; /* Remove border */
+    color: white; /* Text color */
+    padding: 12px 24px; /* Padding for the button */
+    text-align: center; /* Center the text */
+    text-decoration: none; /* Remove underline */
+    display: inline-block; /* Inline-block for consistent sizing */
+    font-size: 16px; /* Font size */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
+}
+
+.contactbtn a {
+    color: inherit; /* Inherit text color */
+    text-decoration: none; /* Remove underline */
+    display: block; /* Ensure the anchor fills the button */
+}
+
+/* Hover and Active States */
+.contactbtn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.contactbtn:active {
+    background-color: #004494; /* Even darker blue on click */
+    transform: scale(0.98); /* Slightly shrink on click */
+}
+
+    </style>
     <header>
         <h1>AI Blog Generator</h1>
         <div class="header-buttons">
@@ -45,49 +78,76 @@
 
     <footer>
         <p>&copy; 2024 AI Blog Generator. All rights reserved. Built by Ephey Hertz</p>
+        <button id="contact" class="contactbtn"><a href="/contact/" style="text-decoration:none">Contact Us</a></button>
     </footer>
 
     <script>
         document.getElementById('generate-btn').addEventListener('click', function() {
             // Get the values from the input fields
-            const youtubeLink = document.getElementById('link-input').value;
+            const youtubeLink = document.getElementById('link-input').value.trim();
             const fileInput = document.getElementById('file-upload').files[0];
+        
+            // Check if form data is empty
+            if (!youtubeLink && !fileInput) {
+                alert("Please provide either a YouTube link or upload a file.");
+                return; // Prevent form submission
+            }
+        
+            // Check if both file and YouTube link are provided
+            if (youtubeLink && fileInput) {
+                alert("Please provide either a YouTube link or upload a file, not both.");
+                return; // Prevent form submission
+            }
         
             // Prepare the form data to be sent
             const formData = new FormData();
-            formData.append('youtube_link', youtubeLink);
+            if (youtubeLink) {
+                formData.append('youtube_link', youtubeLink);
+            }
             if (fileInput) {
                 formData.append('file', fileInput);
             }
         
-            // Show the loading section and hide the input section
-            document.getElementById('input-section').classList.add('hidden');
-            document.getElementById('loading-section').classList.remove('hidden');
+            try {
+                // Show the loading section and hide the input section
+                document.getElementById('input-section').classList.add('hidden');
+                document.getElementById('loading-section').classList.remove('hidden');
         
-            // Send the form data to the /generateblog endpoint
-            fetch('/generateblog/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': getCSRFToken(), // Include the CSRF token
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Hide the loading section and show the result section
-                document.getElementById('loading-section').classList.add('hidden');
-                document.getElementById('result-section').classList.remove('hidden');
+                // Send the form data to the /generateblog endpoint
+                fetch('/generateblog/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(), // Include the CSRF token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide the loading section and show the result section
+                    document.getElementById('loading-section').classList.add('hidden');
+                    document.getElementById('result-section').classList.remove('hidden');
         
-                // Display the generated blog content
-                document.getElementById('blog-output').innerText = data.content; // Update this line
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while generating the blog. Please try again.');
+                    // Display the generated blog content
+                    document.getElementById('blog-output').innerText = data.content;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while generating the blog. Please try again.');
+                    // Show the input section again in case of an error
+                    document.getElementById('loading-section').classList.add('hidden');
+                    document.getElementById('input-section').classList.remove('hidden');
+                });
+            } catch (error) {
+                alert('An unexpected error occurred: ' + error.message);
                 // Show the input section again in case of an error
                 document.getElementById('loading-section').classList.add('hidden');
                 document.getElementById('input-section').classList.remove('hidden');
-            });
+            }
         });
         
         // Function to get the CSRF token from the cookie
@@ -113,11 +173,11 @@
             document.getElementById('blog-output').innerText = '';
             document.getElementById('source-info').innerText = '';
         });
-
+        
         document.getElementById('save-btn').addEventListener('click', function() {
             alert("Blog saved successfully!");
         });
-
+        
         document.getElementById('delete-btn').addEventListener('click', function() {
             if (confirm("Are you sure you want to delete this blog?")) {
                 document.getElementById('result-section').classList.add('hidden');
@@ -126,14 +186,15 @@
                 document.getElementById('source-info').innerText = '';
             }
         });
-
+        
         document.getElementById('logout').addEventListener('click', function() {
             alert("Logged out successfully!");
         });
-
+        
         document.getElementById('view-tasks').addEventListener('click', function() {
             alert("Viewing all tasks...");
         });
+        
     </script>
 </body>
 </html>

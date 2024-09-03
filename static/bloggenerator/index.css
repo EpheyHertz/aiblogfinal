@@ -51,6 +51,8 @@ nav ul li a:hover {
 }
 
 .primary-btn {
+    visibility: visible;
+    pointer-events: auto; /* Ensure pointer events are enabled */
     background-color: #007bff;
     color: white;
     padding: 10px 20px;

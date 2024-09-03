@@ -9,6 +9,40 @@
     <script src="{% static 'bloggenerator/blogdetails.js' %}" defer></script>
 </head>
 <body>
+    <style>
+        /* Basic Button Styles */
+.contactbtn {
+    background-color: #007BFF; /* Button background color */
+    border: none; /* Remove border */
+    color: white; /* Text color */
+    padding: 12px 24px; /* Padding for the button */
+    text-align: center; /* Center the text */
+    text-decoration: none; /* Remove underline */
+    display: inline-block; /* Inline-block for consistent sizing */
+    font-size: 16px; /* Font size */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
+}
+
+.contactbtn a {
+    color: inherit; /* Inherit text color */
+    text-decoration: none; /* Remove underline */
+    display: block; /* Ensure the anchor fills the button */
+}
+
+/* Hover and Active States */
+.contactbtn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.contactbtn:active {
+    background-color: #004494; /* Even darker blue on click */
+    transform: scale(0.98); /* Slightly shrink on click */
+}
+
+    </style>
     <header>
         <h1>AI Blog Generator</h1>
         <div class="header-buttons">
@@ -21,21 +55,37 @@
     <main>
         <section id="blog-details">
             <h2 id="blog-title">{{ blog_article_detail.youtube_title }}</h2>
-            <p id="blog-date">Generated on:{{ blog_article_detail.created_at }}</p>
-            <p id="blog-source">Source YouTube Link: <a href="{{ blog_article_detail.youtube_link }}" id="source-link" target="_blank" style="text-decoration:none">{{ blog_article_detail.youtube_link }}</a> <!-- or --></p>
             <hr>
+            <p id="blog-date">Generated on:{{ blog_article_detail.created_at }}</p>
+            <p id="blog-date"><h5>The Transcript Used: </h5>{{ blog_article_detail.transcript }}</p>
+            <p id="blog-source">
+                {% if blog_article_detail.youtube_link|slice:":4" == "http" %}
+                    Source YouTube Link: 
+                    <a href="{{ blog_article_detail.youtube_link }}" id="source-link" target="_blank" style="text-decoration:none">
+                        {{ blog_article_detail.youtube_link }}
+                    </a>
+                {% else %}
+                    Source is from your Files: {{ blog_article_detail.youtube_link }}
+                {% endif %}
+            </p>
+            <hr>
+            
             <div id="blog-content">
                 <p>{{ blog_article_detail.generated_content }}</p>
                 <!-- More blog content goes here -->
             </div>
             <div class="action-buttons">
-                <button class="danger-btn delete-btn"><a href="/deleteblog/{{ blog_article_detail.id }}" style="text-decoration:none">Delete</a></button>
+                <form method="POST" action="{% url 'delete_blog' blog_id=blog_article_detail.id %}">
+                    {% csrf_token %}
+                    <button class="danger-btn" type="submit" style="text-decoration:none">Delete</button>
+                </form>
             </div>
         </section>
     </main>
 
     <footer>
         <p>&copy; 2024 AI Blog Generator. All rights reserved.Buid By Ephey Hertz</p>
+        <button id="contact" class="contactbtn"><a href="/contact/" style="text-decoration:none">Contact Us</a></button>
     </footer>
 </body>
 </html>

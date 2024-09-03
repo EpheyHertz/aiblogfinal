@@ -85,12 +85,8 @@ WSGI_APPLICATION = 'aiblog_app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bloggenerator_placehalf',
-        'USER':'bloggenerator_placehalf',
-        'PASSWORD':'83fe51ce35907dfbaba34e1ef02497658686a2ab',
-        'HOST':'jux.h.filess.io',
-        'PORT':'3307',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -128,7 +124,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
+from decouple import config
+GEMINI_API_KEY = config('GEMINI_API_KEY')
+AAI_API_KEY = config('AAI_API_KEY')
 
 STATIC_URL = '/static/'
 
@@ -147,3 +145,15 @@ MEDIA_URL ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL ='/login/'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+# SMTP server details from environment variables
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+CONTACT_EMAIL = os.getenv('CONTACT_EMAIL')
+
+
