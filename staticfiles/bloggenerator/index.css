@@ -1,0 +1,220 @@
+/* General Styles */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background-color: #282c34;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    animation: slideInDown 1s ease-in-out;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    margin: 0;
+}
+
+nav ul li {
+    margin: 0;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #007bff;
+}
+
+.primary-btn {
+    visibility: visible;
+    pointer-events: auto; /* Ensure pointer events are enabled */
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.primary-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+main {
+    padding: 40px 20px;
+}
+
+#hero {
+    background-image: url('images/hero-background.jpg'); /* Add your hero image here */
+    background-size: cover;
+    background-position: center;
+    padding: 100px 20px;
+    text-align: center;
+    color: white;
+    animation: fadeIn 2s ease-in-out;
+}
+
+.hero-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    animation: slideInUp 1s ease-in-out;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    animation: slideInUp 1s ease-in-out 0.2s;
+}
+
+#features, #how-it-works, #about {
+    padding: 60px 20px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+    animation: fadeInUp 1.5s ease-in-out;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.feature-cards {
+    display: flex;
+    gap: 20px;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 250px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+footer {
+    background-color: #282c34;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 1.5s ease-in-out;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #007bff;
+}
+
+/* Scroll Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .feature-cards {
+        flex-direction: column;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    nav ul li {
+        text-align: center;
+    }
+}
