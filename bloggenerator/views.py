@@ -2,7 +2,8 @@ import filetype
 import logging
 import os
 import json
-from youtube_dl import YoutubeDL
+from yt_dlp import YoutubeDL
+# from youtube_dl import YoutubeDL
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
