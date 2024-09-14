@@ -212,12 +212,12 @@ def download_audio(link):
             info_dict = ydl.extract_info(link, download=True)
             file_path = ydl.prepare_filename(info_dict)
             base, ext = os.path.splitext(file_path)
-            new_file = base + '.mp3'
+            new_file = base + '.webm'
 
             # Check if the file already exists and rename it if necessary
             if os.path.exists(new_file):
                 base = f"{base}_{info_dict['id']}"
-                new_file = base + '.mp3'
+                new_file = base + '.webm'
 
             os.rename(file_path, new_file)
             logging.info(f"File renamed successfully: {new_file}")
