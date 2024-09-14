@@ -154,9 +154,17 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_URL ='/media/'
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# URL for serving media files
+MEDIA_URL = '/media/'
+
+# Path where media files will be stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Ensure the media directory exists. If not, create it.
+if not os.path.exists(MEDIA_ROOT):
+    os.makedirs(MEDIA_ROOT)
 
 LOGIN_URL ='/login/'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

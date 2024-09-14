@@ -86,15 +86,18 @@ def generate_blog(request):
             file = request.FILES.get('file')
 
             if youtube_link:
-                # Handle YouTube link
                 title = yt_title(youtube_link)
+                # Download audio from the YouTube link
+                audio_file = download_audio(youtube_link)
+                if not audio_file:
+                    return JsonResponse({'error': 'Failed to download audio from YouTube'}, status=500)
 
-                # Get the transcription from the YouTube video
-                transcription = get_transcription(youtube_link)
+                # Get the transcription from the audio file
+                transcription = get_transcription_from_file(audio_file)  # Custom transcription function
                 if not transcription:
-                    return JsonResponse({'error': 'Failed to get transcription'}, status=500)
+                    return JsonResponse({'error': 'Failed to transcribe the audio'}, status=500)
 
-                # Generate the blog content
+                # Generate the blog content from the transcription
                 blog_content = generate_blog_from_transcription(transcription)
                 if not blog_content:
                     return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
@@ -114,66 +117,53 @@ def generate_blog(request):
                 title = file.name
                 file_path = save_file(file)  # Custom function to save the file and return the path
 
+                if not file_path:
+                    return JsonResponse({'error': 'Failed to save the uploaded file'}, status=500)
+
                 # Check if the file is a video
                 if is_video_file(file):
                     audio_file_path = extract_audio_from_video(file_path)  # Custom function to extract audio
+                    if not audio_file_path:
+                        return JsonResponse({'error': 'Failed to extract audio from video'}, status=500)
                 else:
                     audio_file_path = file_path
 
                 # Get the transcription from the file
                 transcription = get_transcription_from_file(audio_file_path)
                 if not transcription:
-                    return JsonResponse({'error': 'Failed to get transcription'}, status=500)
+                    return JsonResponse({'error': 'Failed to transcribe the audio'}, status=500)
 
                 # Generate the blog content
                 blog_content = generate_blog_from_transcription(transcription)
                 if not blog_content:
-    # If no content was generated, set blog_content to a specific value
-                        blog_content = "Content could not be generated. Here is the transcription instead."
+                    return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
 
-    # Save the transcription to the database without generated content
-                        new_blog_article = BlogPost.objects.create(
-                            user=request.user,
-                            youtube_title=title,
-                            youtube_link=youtube_link if youtube_link else file_path,
-                            transcript=transcription,                     
-                            generated_content=blog_content
-                         )
-                        new_blog_article.save()
-
-    # Render the transcription to the frontend
-                        return JsonResponse({
-                            'message': 'Content generation failed. Transcription has been saved instead.',
-                            'transcription': transcription,
-                            'generated_content': blog_content
-                        })
-
-# Save the blog article with generated content
+                # Save the blog article
                 new_blog_article = BlogPost.objects.create(
                     user=request.user,
                     youtube_title=title,
-                     youtube_link=youtube_link if youtube_link else file_path,
+                    youtube_link=file_path,  # Store the file path in youtube_link
                     transcript=transcription,
                     generated_content=blog_content
                 )
                 new_blog_article.save()
 
-
-
             else:
                 return JsonResponse({'error': 'You must provide either a YouTube link or upload a file'}, status=400)
 
-            # Return the generated blog content as a response
             return JsonResponse({"content": blog_content})
 
         except (KeyError, json.JSONDecodeError) as e:
             logging.error(f"Error processing POST data: {e}")
             return JsonResponse({'error': 'Invalid data sent'}, status=400)
+
         except Exception as e:
             logging.error(f"Unexpected error: {e}", exc_info=True)
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
+
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 def extract_audio_from_video(video_path):
     try:
@@ -213,12 +203,12 @@ def download_audio(link):
             info_dict = ydl.extract_info(link, download=True)  # Download audio
             file_path = ydl.prepare_filename(info_dict)
             base, ext = os.path.splitext(file_path)
-            new_file = base + '.webm'  # Change extension to .webm
+            new_file = base + '.mp3'  # Change extension to .webm
 
             # Rename file if it already exists
             if os.path.exists(new_file):
                 base = f"{base}_{info_dict['id']}"
-                new_file = base + '.webm'
+                new_file = base + '.mp3'
 
             os.rename(file_path, new_file)  # Rename the downloaded file
             logging.info(f"File renamed successfully to: {new_file}")
