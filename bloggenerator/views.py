@@ -2,7 +2,7 @@ import filetype
 import logging
 import os
 import json
-from yt_dlp import YoutubeDL
+from youtube_dl import YoutubeDL
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
@@ -196,36 +196,37 @@ def yt_title(link):
         title = yt.title
         return title
     except Exception as e:
-        logging.error(f"Error fetching YouTube title: {e}")
+        logging.error(f"Error fetching YouTube title for link {link}: {e}")
         return None
 
 def download_audio(link):
     try:
+        # YouTube-DL options
         ydl_opts = {
             'format': 'bestaudio/best',
             'outtmpl': os.path.join(settings.MEDIA_ROOT, '%(title)s.%(ext)s'),
-            'retries': 5,  # Retry up to 5 times
-            'timeout': 60,  # Increase timeout to 60 seconds
+            'retries': 5,  # Retry up to 5 times in case of failure
+            'timeout': 60,  # Set timeout to 60 seconds for the download
         }
 
         with YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)
+            info_dict = ydl.extract_info(link, download=True)  # Download audio
             file_path = ydl.prepare_filename(info_dict)
             base, ext = os.path.splitext(file_path)
-            new_file = base + '.webm'
+            new_file = base + '.webm'  # Change extension to .webm
 
-            # Check if the file already exists and rename it if necessary
+            # Rename file if it already exists
             if os.path.exists(new_file):
                 base = f"{base}_{info_dict['id']}"
                 new_file = base + '.webm'
 
-            os.rename(file_path, new_file)
-            logging.info(f"File renamed successfully: {new_file}")
+            os.rename(file_path, new_file)  # Rename the downloaded file
+            logging.info(f"File renamed successfully to: {new_file}")
 
         return new_file
 
     except Exception as e:
-        logging.error(f"Error in download_audio function: {e}", exc_info=True)
+        logging.error(f"Error downloading audio from {link}: {e}", exc_info=True)
         return None
 
 
