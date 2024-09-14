@@ -195,9 +195,15 @@ def download_audio(link):
         # YouTube-DL options
         ydl_opts = {
             'format': 'bestaudio/best',
-            'outtmpl': os.path.join(settings.MEDIA_ROOT, '%(title)s.%(ext)s'),
-            'retries': 5,  # Retry up to 5 times in case of failure
-            'timeout': 60,  # Set timeout to 60 seconds for the download
+            'outtmpl': 'media/%(title)s.%(ext)s',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'retries': 5,
+            'noplaylist': True,
+            'proxy': 'http://51.89.134.68:80',  # Example proxy
         }
 
         with YoutubeDL(ydl_opts) as ydl:
