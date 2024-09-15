@@ -10,45 +10,116 @@
 </head>
 <body>
     <style>
-        /* Basic Button Styles */
-.contactbtn {
-    background-color: #007BFF; /* Button background color */
-    border: none; /* Remove border */
-    color: white; /* Text color */
-    padding: 12px 24px; /* Padding for the button */
-    text-align: center; /* Center the text */
-    text-decoration: none; /* Remove underline */
-    display: inline-block; /* Inline-block for consistent sizing */
-    font-size: 16px; /* Font size */
-    border-radius: 8px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
-}
+        /* Header Styling */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #343a40; /* Dark gray background for professionalism */
+            color: white;
+        }
 
-.contactbtn a {
-    color: inherit; /* Inherit text color */
-    text-decoration: none; /* Remove underline */
-    display: block; /* Ensure the anchor fills the button */
-}
+        h1 {
+            margin: 0;
+        }
 
-/* Hover and Active States */
-.contactbtn:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
-}
+        /* Dropdown Styling */
+        .nav-toggle {
+            position: relative;
+            display: inline-block;
+        }
 
-.contactbtn:active {
-    background-color: #004494; /* Even darker blue on click */
-    transform: scale(0.98); /* Slightly shrink on click */
-}
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
 
+        .dropdown-menu a {
+            color: #343a40;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .nav-toggle:hover .dropdown-menu {
+            display: block;
+        }
+
+        /* Button Styles */
+        .primary-btn, .danger-btn {
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .primary-btn {
+            background-color: #007bff; /* Primary button color */
+        }
+
+        .danger-btn {
+            background-color: #dc3545; /* Danger (Delete, Logout) button color */
+        }
+
+        .primary-btn:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .danger-btn:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+
+        footer p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        /* Responsive Styling */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav-toggle {
+                width: 100%;
+            }
+            .dropdown-menu {
+                width: 100%;
+                right: 0;
+            }
+        }
     </style>
+
     <header>
         <h1>AI Blog Generator</h1>
-        <div class="header-buttons">
-            <p>Welcome {{ user.username|capfirst }}</p>
-            <button id="back" class="primary-btn"><a href="/blog-posts" style="text-decoration:none">Back to all Blogs</a></button>
-            <button id="logout" class="danger-btn"><a href="/logout/" style="text-decoration:none">Logout</a></button>
+        <div class="nav-toggle">
+            <button class="primary-btn">Menu</button>
+            <div class="dropdown-menu">
+                <a href="/blog-posts/">View Generations</a>
+                <a href="/contact/">Contact Us</a>
+                <a href="/logout/">Logout</a>
+            </div>
         </div>
     </header>
 
@@ -56,12 +127,13 @@
         <section id="blog-details">
             <h2 id="blog-title">{{ blog_article_detail.youtube_title }}</h2>
             <hr>
-            <p id="blog-date">Generated on:{{ blog_article_detail.created_at }}</p>
-            <p id="blog-date"><h5>The Transcript Used: </h5>{{ blog_article_detail.transcript }}</p>
+            <p id="blog-date">Generated on: {{ blog_article_detail.created_at }}</p>
+            <h5>The Transcript Used:</h5>
+            <p>{{ blog_article_detail.transcript }}</p>
             <p id="blog-source">
                 {% if blog_article_detail.youtube_link|slice:":4" == "http" %}
-                    Source YouTube Link: 
-                    <a href="{{ blog_article_detail.youtube_link }}" id="source-link" target="_blank" style="text-decoration:none">
+                    Source YouTube Link:
+                    <a href="{{ blog_article_detail.youtube_link }}" target="_blank" style="text-decoration:none">
                         {{ blog_article_detail.youtube_link }}
                     </a>
                 {% else %}
@@ -69,10 +141,8 @@
                 {% endif %}
             </p>
             <hr>
-            
             <div id="blog-content">
                 <p>{{ blog_article_detail.generated_content }}</p>
-                <!-- More blog content goes here -->
             </div>
             <div class="action-buttons">
                 <form method="POST" action="{% url 'delete_blog' blog_id=blog_article_detail.id %}">
@@ -84,8 +154,8 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 AI Blog Generator. All rights reserved.Buid By Ephey Hertz</p>
-        <button id="contact" class="contactbtn"><a href="/contact/" style="text-decoration:none">Contact Us</a></button>
+        <p>&copy; 2024 AI Blog Generator. All rights reserved. Built by Ephey Hertz</p>
     </footer>
+
 </body>
 </html>

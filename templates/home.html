@@ -7,48 +7,246 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Blog Generator</title>
     <link rel="stylesheet" href="{% static 'bloggenerator/home.css' %}">
-</head>
-<body>
     <style>
-        .contactbtn {
-    background-color: #007BFF; /* Button background color */
-    border: none; /* Remove border */
-    color: white; /* Text color */
-    padding: 12px 24px; /* Padding for the button */
-    text-align: center; /* Center the text */
-    text-decoration: none; /* Remove underline */
-    display: inline-block; /* Inline-block for consistent sizing */
-    font-size: 16px; /* Font size */
-    border-radius: 8px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
-}
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
 
-.contactbtn a {
-    color: inherit; /* Inherit text color */
-    text-decoration: none; /* Remove underline */
-    display: block; /* Ensure the anchor fills the button */
-}
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
 
-/* Hover and Active States */
-.contactbtn:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
-}
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
 
-.contactbtn:active {
-    background-color: #004494; /* Even darker blue on click */
-    transform: scale(0.98); /* Slightly shrink on click */
-}
+        /* Navbar Dropdown and Toggle Menu Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: white;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            z-index: 1;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .dropdown-content a {
+            text-decoration: none;
+            display: block;
+            padding: 8px 16px;
+            color: black;
+            border-radius: 4px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown-toggle:hover {
+            background-color: #0056b3;
+            border-radius: 50%;
+        }
+
+        .dropdown svg {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .contact-content {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            background-color: white;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            z-index: 1;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .contact-content a {
+            text-decoration: none;
+            display: block;
+            padding: 8px 16px;
+            color: black;
+            border-radius: 4px;
+        }
+
+        .contact-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .contact-btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+            border-radius: 50%;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .primary-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .primary-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .primary-btn:hover:not(:disabled) {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+        background-color: #f8f9fa; /* Light gray background for professional look */
+        padding: 20px 0;
+        border-top: 1px solid #dee2e6; /* Subtle top border for separation */
+        color: #6c757d; /* Soft gray text */
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* For better responsiveness */
+    }
+
+    .footer-container p {
+        margin: 0;
+        font-size: 14px;
+        color: #343a40; /* Darker gray for better readability */
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 15px;
+    }
+
+    .footer-links a {
+        text-decoration: none;
+        color: #007bff; /* Same color as other elements for consistency */
+        transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: #0056b3; /* Darker blue on hover */
+    }
+
+    /* Responsive Footer Styling */
+    @media (max-width: 768px) {
+        .footer-container {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .footer-links {
+            margin-top: 10px;
+        }
+    }
 
     </style>
+</head>
+<body>
     <header>
         <h1>AI Blog Generator</h1>
-        <div class="header-buttons">
-            <p>Welcome {{ user.username|capfirst }}</p>
-            <button id="view-tasks" class="secondary-btn"><a href="/blog-posts/">View Generations</a></button>
-            <button id="logout" class="danger-btn"><a href="/logout/">Logout</a></button>
+        <div class="dropdown">
+            <!-- SVG Menu Icon for Dropdown -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="dropdown-toggle" onclick="toggleDropdown()">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            
+            <!-- Dropdown Menu Content -->
+            <div class="dropdown-content" id="dropdown-menu">
+                <a href="/blog-posts/">View Generations</a>
+                <a href="/logout/">Logout</a>
+                <a href="/contact/">Contact Us</a>
+            </div>
         </div>
+
+        <!-- <div class="dropdown">
+            SVG Menu Icon for Contact -->
+            <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="contact-btn" onclick="toggleContact()">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h18M3 10h18m-9 5h9m-18 0h9" />
+            </svg>
+
+            Contact Toggle Content -->
+            <!-- <div class="contact-content" id="contact-menu">
+                <a href="/contact/">Contact Us</a>
+            </div>
+        </div> -->
     </header>
 
     <main>
@@ -72,34 +270,46 @@
         <section id="result-section" class="hidden">
             <div id="blog-output" class="blog-container"></div>
             <p id="source-info" class="source-info"></p>
-            
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 AI Blog Generator. All rights reserved. Built by Ephey Hertz</p>
-        <button id="contact" class="contactbtn"><a href="/contact/" style="text-decoration:none">Contact Us</a></button>
+        <div class="footer-container">
+            <p>&copy; 2024 AI Blog Generator. All rights reserved.</p>
+            
+        </div>
     </footer>
 
     <script>
-        document.getElementById('generate-btn').addEventListener('click', function() {
-            // Get the values from the input fields
+        const generateBtn = document.getElementById('generate-btn');
+
+        // Function to toggle dropdown menu
+        function toggleDropdown() {
+            const menu = document.getElementById('dropdown-menu');
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Function to toggle contact menu
+        // function toggleContact() {
+        //     const contactMenu = document.getElementById('contact-menu');
+        //     contactMenu.style.display = (contactMenu.style.display === 'block') ? 'none' : 'block';
+        // }
+
+        generateBtn.addEventListener('click', function() {
+            // Disable the button to prevent multiple submissions
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+
             const youtubeLink = document.getElementById('link-input').value.trim();
             const fileInput = document.getElementById('file-upload').files[0];
         
-            // Check if form data is empty
             if (!youtubeLink && !fileInput) {
                 alert("Please provide either a YouTube link or upload a file.");
-                return; // Prevent form submission
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Blog';
+                return;
             }
-        
-            // Check if both file and YouTube link are provided
-            if (youtubeLink && fileInput) {
-                alert("Please provide either a YouTube link or upload a file, not both.");
-                return; // Prevent form submission
-            }
-        
-            // Prepare the form data to be sent
+
             const formData = new FormData();
             if (youtubeLink) {
                 formData.append('youtube_link', youtubeLink);
@@ -107,94 +317,50 @@
             if (fileInput) {
                 formData.append('file', fileInput);
             }
-        
+
             try {
-                // Show the loading section and hide the input section
                 document.getElementById('input-section').classList.add('hidden');
                 document.getElementById('loading-section').classList.remove('hidden');
-        
-                // Send the form data to the /generateblog endpoint
+
                 fetch('/generateblog/', {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'X-CSRFToken': getCSRFToken(), // Include the CSRF token
-                    }
+                    headers: { 'X-CSRFToken': getCSRFToken() }
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    // Hide the loading section and show the result section
                     document.getElementById('loading-section').classList.add('hidden');
                     document.getElementById('result-section').classList.remove('hidden');
-        
-                    // Display the generated blog content
                     document.getElementById('blog-output').innerText = data.content;
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while generating the blog. Please try again.');
-                    // Show the input section again in case of an error
-                    document.getElementById('loading-section').classList.add('hidden');
-                    document.getElementById('input-section').classList.remove('hidden');
+                .finally(() => {
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = 'Generate Blog';
                 });
             } catch (error) {
                 alert('An unexpected error occurred: ' + error.message);
-                // Show the input section again in case of an error
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Blog';
                 document.getElementById('loading-section').classList.add('hidden');
                 document.getElementById('input-section').classList.remove('hidden');
             }
         });
-        
-        // Function to get the CSRF token from the cookie
+
         function getCSRFToken() {
             let cookieValue = null;
             const name = 'csrftoken';
-            if (document.cookie && document.cookie !== '') {
+            if (document.cookie) {
                 const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+                cookies.forEach(cookie => {
+                    const trimmedCookie = cookie.trim();
+                    if (trimmedCookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(trimmedCookie.split('=')[1]);
                     }
-                }
+                });
             }
             return cookieValue;
         }
-        
-        document.getElementById('regenerate-btn').addEventListener('click', function() {
-            document.getElementById('input-section').classList.remove('hidden');
-            document.getElementById('result-section').classList.add('hidden');
-            document.getElementById('blog-output').innerText = '';
-            document.getElementById('source-info').innerText = '';
-        });
-        
-        document.getElementById('save-btn').addEventListener('click', function() {
-            alert("Blog saved successfully!");
-        });
-        
-        document.getElementById('delete-btn').addEventListener('click', function() {
-            if (confirm("Are you sure you want to delete this blog?")) {
-                document.getElementById('result-section').classList.add('hidden');
-                document.getElementById('input-section').classList.remove('hidden');
-                document.getElementById('blog-output').innerText = '';
-                document.getElementById('source-info').innerText = '';
-            }
-        });
-        
-        document.getElementById('logout').addEventListener('click', function() {
-            alert("Logged out successfully!");
-        });
-        
-        document.getElementById('view-tasks').addEventListener('click', function() {
-            alert("Viewing all tasks...");
-        });
-        
     </script>
 </body>
 </html>
+

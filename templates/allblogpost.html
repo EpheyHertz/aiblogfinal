@@ -11,12 +11,156 @@
     <script src="{% static 'bloggenerator/blogdetails.js' %}" defer></script>
 </head>
 <body>
+    <style>
+        /* Header Styling */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #343a40; /* Dark gray background */
+            color: white;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        /* Dropdown Styling */
+        .nav-toggle {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .dropdown-menu a {
+            color: #343a40;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .nav-toggle:hover .dropdown-menu {
+            display: block;
+        }
+
+        /* Button Styles */
+        .primary-btn, .danger-btn {
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .primary-btn {
+            background-color: #007bff; /* Primary button color */
+        }
+
+        .danger-btn {
+            background-color: #dc3545; /* Danger button color */
+        }
+
+        .primary-btn:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .danger-btn:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+
+        /* Generation List Styling */
+        #generation-list h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .generation-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .generation-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .generation-item:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .action-buttons a {
+            text-decoration: none;
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+
+        footer p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav-toggle {
+                width: 100%;
+            }
+            .dropdown-menu {
+                width: 100%;
+                right: 0;
+            }
+            .generation-item {
+                width: 100%;
+            }
+        }
+    </style>
+
     <header>
         <h1>AI Blog Generator</h1>
-        <div class="header-buttons">
-            <p>Welcome {{ user.username|capfirst }}</p>
-            <button class="danger-btn"><a href="/dashboard/">Go Back</a></button>
-            <button id="logout" class="danger-btn"><a href="/logout/">Logout</a></button>
+        <div class="nav-toggle">
+            <button class="primary-btn">Menu</button>
+            <div class="dropdown-menu">
+                <a href="/dashboard/">Go Back</a>
+                <a href="/contact/">Contact Us</a>
+                <a href="/logout/">Logout</a>
+            </div>
         </div>
     </header>
 
@@ -25,28 +169,25 @@
             <h2>All Your Blog Generations</h2>
             <div class="generation-container">
                 <!-- Blog generation items will be dynamically added here -->
-                 {% for article in blog_articles reversed %}
-            <a href="/blog-details/{{article.id}}" style="text-decoration:none">
-                <div class="generation-item">
-                    <h3>{{ article.youtube_title }}</h3>
-                    <p>Generated on: {{ article.created_at }}</p>
-                    <p> {{ article.generated_content|truncatechars:30 }}</p>
-                    <div class="action-buttons">
-                        <button class="primary-btn view-btn">View</button>
-                        {% comment %} <button class="secondary-btn regenerate-btn">Regenerate</button>
-                        <button class="danger-btn delete-btn"><a href="/deleteblog/{{ article.id }}" style="text-decoration:none">Delete</a></button> {% endcomment %}
+                {% for article in blog_articles reversed %}
+                <a href="/blog-details/{{article.id}}" style="text-decoration:none">
+                    <div class="generation-item">
+                        <h3>{{ article.youtube_title }}</h3>
+                        <p>Generated on: {{ article.created_at }}</p>
+                        <p>{{ article.generated_content|truncatechars:30 }}</p>
+                        <div class="action-buttons">
+                            <button class="primary-btn view-btn">View</button>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
                 {% endfor %}
-                
-                <!-- More items can be added here -->
             </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 AI Blog Generator. All rights reserved.Build By Ephey Hertz</p>
+        <p>&copy; 2024 AI Blog Generator. All rights reserved. Built by Ephey Hertz</p>
     </footer>
+
 </body>
 </html>

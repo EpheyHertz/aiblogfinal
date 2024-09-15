@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{% csrf_token %}">
     <title>Register Page</title>
 
     <link rel="stylesheet" href="{% static 'bloggenerator/register.css' %}">
@@ -21,12 +22,12 @@
             <h1>SignUp</h1>
             <p id="error-message"></p>
             {%if error_message%}
-            <div style="color:red,align:center">
+            <div style="color:red,align,center">
                 {{ error_message }}
             </div>
             {% endif %}
             <hr>
-            <form id="myform" action="" method="post">
+            <form id="myform" method="post">
             {% csrf_token %}
 
                

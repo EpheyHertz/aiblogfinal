@@ -189,6 +189,25 @@ def yt_title(link):
     except Exception as e:
         logging.error(f"Error fetching YouTube title for link {link}: {e}")
         return None
+    
+
+# def convert_youtube_url_to_mp3(youtube_url: str, destination: str = BASE_DIR / 'music/') -> File:
+#     url = YouTube(str(youtube_url))
+#     audio_stream = url.streams.filter(only_audio=True).first()
+#     # Get the first video with only audio true format
+#     out_file = audio_stream.download(output_path=destination)
+#     # Download the mp4 from YouTube URL
+#     audio = NamedTemporaryFile(dir='music')
+#     audio.write(File(file=open(out_file, 'rb')).read())
+#     audio.flush()
+#     audio = File(audio)
+#     name = str(audio.name).split('.')[-1]
+#     name += '.mp3'
+#     audio_path = name.split('/')[-1:]
+#     audio.name = '/'.join(audio_path)
+#     os.remove(out_file)  # Delete the mp4 file from local
+#     return audio
+
 
 def download_audio(link):
     try:
@@ -203,7 +222,7 @@ def download_audio(link):
             }],
             'retries': 5,
             'noplaylist': True,
-            'proxy': 'http://211.104.20.205:8080',  # Example proxy
+            'proxy': 'https://211.104.20.205:8080',  # Example proxy
         }
 
         with YoutubeDL(ydl_opts) as ydl:

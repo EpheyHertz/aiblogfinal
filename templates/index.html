@@ -5,20 +5,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Blog Generator</title>
+    <title>AI Blog Generator - Welcome</title>
     <link rel="stylesheet" href="{% static 'bloggenerator/index.css' %}">
     <script src="{% static 'bloggenerator/index.js' %}" defer></script>
 </head>
 <body>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        /* Navigation Styles */
+        nav {
+            position: relative;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #007bff;
+        }
+
+        .primary-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .primary-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Hamburger Menu Icon */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Navigation for Medium Screens */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                right: 0;
+                background-color: #343a40;
+                width: 200px;
+                padding: 10px;
+                border-radius: 5px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+        }
+
+        /* Hero Section Styles */
+        #hero {
+            background-image: url('../static/bloggenerator/images/hero-background.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero-content p {
+            font-size: 24px;
+            margin-bottom: 40px;
+        }
+
+        /* Features Section */
+        #features {
+            background-color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .feature-cards {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            width: 300px;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        /* How It Works Section */
+        #how-it-works {
+            background-color: #f8f9fa;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        #how-it-works ol {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* About Us Section */
+        #about {
+            padding: 60px 20px;
+            background-color: white;
+            text-align: center;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer-links {
+            margin: 10px 0;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        /* Back to Top Button */
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        #back-to-top:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+
+    </style>
+
     <header>
         <h1>AI Blog Generator</h1>
         <nav>
-            <ul>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#about">About Us</a></li>
+            <!-- Hamburger Menu for Medium Screens -->
+            <div class="hamburger" id="hamburger">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <!-- Navigation Links -->
+            <div class="nav-links" id="nav-links">
+                <!-- <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#about">About Us</a> -->
+                <a href="/register/" class="primary-btn">Sign Up</a>
                 <a href="/login/" class="primary-btn">Login</a>
-            </ul>
+            </div>
         </nav>
     </header>
 
@@ -31,7 +255,7 @@
             </div>
         </section>
 
-        <section id="features" class="fade-in">
+        <section id="features">
             <h2>Features</h2>
             <div class="feature-cards">
                 <div class="card">
@@ -49,7 +273,7 @@
             </div>
         </section>
 
-        <section id="how-it-works" class="fade-in">
+        <section id="how-it-works">
             <h2>How It Works</h2>
             <p>Our AI Blog Generator is designed to be user-friendly and efficient. Follow these simple steps:</p>
             <ol>
@@ -59,20 +283,46 @@
             </ol>
         </section>
 
-        <section id="about" class="fade-in">
+        <section id="about">
             <h2>About Us</h2>
             <p>We are passionate about making content creation easy and accessible for everyone. Our AI-powered tool is designed to help you generate quality blogs effortlessly.</p>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 AI Blog Generator. All rights reserved.</p>
+        <p>&copy; 2024 AI Blog Generator. All rights reserved.Buit by Ephey Hertz</p>
         <div class="footer-links">
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
             <a href="#about">About Us</a>
-            <a href="/contact/">Contact</a>
+            <!-- <a href="/contact/">Contact</a> -->
         </div>
     </footer>
-</body>
-</html>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" title="Back to Top">↑</button>
+
+    <script>
+        // Show/Hide Back to Top Button
+        const backToTopBtn = document.getElementById("back-to-top");
+        window.addEventListener("scroll", function () {
+        if (window.scrollY > 300) {
+            backToTopBtn.style.display = "block";
+        } else {
+            backToTopBtn.style.display = "none";
+        }
+    });
+
+    // Scroll to Top on Click
+    backToTopBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Toggle Navigation Menu
+    const hamburger = document.getElementById("hamburger");
+    const navLinks = document.getElementById("nav-links");
+
+    hamburger.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
+    });
+</script>

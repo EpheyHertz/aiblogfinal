@@ -1,4 +1,4 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,19 +6,220 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - AI Blog Generator</title>
     <link rel="stylesheet" href="{% static 'bloggenerator/contact.css' %}">
-    <script src="{% static 'bloggenerator/contact.js' %}" defer></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        /* Navbar Styles */
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: white;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            z-index: 1;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .dropdown-content a {
+            text-decoration: none;
+            display: block;
+            padding: 8px 16px;
+            color: black;
+            border-radius: 4px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown svg {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .contact-btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+            border-radius: 50%;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        #contact {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .primary-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .primary-btn:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        footer {
+        background-color: #f8f9fa; /* Light gray background for professional look */
+        padding: 20px 0;
+        border-top: 1px solid #dee2e6; /* Subtle top border for separation */
+        color: #6c757d; /* Soft gray text */
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* For better responsiveness */
+    }
+
+    .footer-container p {
+        margin: 0;
+        font-size: 14px;
+        color: #343a40; /* Darker gray for better readability */
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 15px;
+    }
+
+    .footer-links a {
+        text-decoration: none;
+        color: #007bff; /* Same color as other elements for consistency */
+        transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: #0056b3; /* Darker blue on hover */
+    }
+
+    /* Responsive Footer Styling */
+    @media (max-width: 768px) {
+        .footer-container {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .footer-links {
+            margin-top: 10px;
+        }
+    }
+
+        /* Responsive Styles */
+        @media screen and (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .dropdown-content {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>AI Blog Generator</h1>
         <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/#features">Features</a></li>
-                <li><a href="/#how-it-works">How It Works</a></li>
-                <li><a href="/#about">About Us</a></li>
-                <li><a href="/login/" class="primary-btn">Login</a></li>
-            </ul>
+            <!-- Dropdown Menu for View Generations and Logout -->
+            <div class="dropdown">
+                <!-- SVG Menu Icon for Dropdown -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="dropdown-toggle" onclick="toggleDropdown()">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+
+                <!-- Dropdown Menu Content -->
+                <div class="dropdown-content" id="dropdown-menu">
+                    <a href="/blog-posts/">View Generations</a>
+                    <a href="/logout/">Logout</a>
+                </div>
+            </div>
         </nav>
     </header>
 
@@ -48,14 +249,18 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 AI Blog Generator. All rights reserved.</p>
-        <div class="footer-links">
-            <a href="/">Home</a>
-            <a href="/#features">Features</a>
-            <a href="/#how-it-works">How It Works</a>
-            <a href="/#about">About Us</a>
-            <a href="/contact/">Contact</a>
+        <div class="footer-container">
+            <p>&copy; 2024 AI Blog Generator. All rights reserved.</p>
+            
         </div>
     </footer>
+    
+    <script>
+        // Function to toggle dropdown menu
+        function toggleDropdown() {
+            const menu = document.getElementById('dropdown-menu');
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
 </body>
 </html>
