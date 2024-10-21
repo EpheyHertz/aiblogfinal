@@ -200,6 +200,7 @@ def yt_title(link):
             'quiet': True,
             'no_warnings': True,
             'skip_download': True,
+            '--proxy': '127.0.0.1:3128',
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(link, download=False)
@@ -237,6 +238,7 @@ def download_audio(link):
             'timeout': 60,
             'quiet': True,
             'no_warnings': True,
+            '--proxy': '127.0.0.1:3128',
         }
 
         with YoutubeDL(ydl_opts) as ydl:
