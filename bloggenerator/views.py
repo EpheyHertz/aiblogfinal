@@ -192,17 +192,21 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 
+import yt_dlp
+
 def yt_title(link):
     try:
-        response = requests.get(link)
-        # Corrected 'lmxl.parser' to 'lxml'
-        soup = BeautifulSoup(response.text, 'lxml')  # or 'html.parser' if you prefer
-        title = soup.find("title").text
-        return title.replace(" - YouTube", "").strip()
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'skip_download': True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(link, download=False)
+            return info_dict.get("title", "").strip()
     except Exception as e:
         # logging.error(f"Error fetching YouTube title for link {link}: {e}")
         return None
-
     
 
 # def convert_youtube_url_to_mp3(youtube_url: str, destination: str = BASE_DIR / 'music/') -> File:
