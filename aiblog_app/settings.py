@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-
+from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -85,10 +85,23 @@ WSGI_APPLICATION = 'aiblog_app.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 # postgresql://aibloggenerator_soundgift:5b64fdb33abb515dd0823c0456189aad5aff5733@kdj.h.filess.io:5433/aibloggenerator_soundgift
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DATABASE'),        # Fetch from .env file
+        'USER': config('POSTGRES_USER'),            # Fetch from .env file
+        'PASSWORD': config('POSTGRES_PASSWORD'),    # Fetch from .env file
+        'HOST': config('POSTGRES_HOST'),            # Fetch from .env file
+        'PORT': config('POSTGRES_PORT'), 
+        
     }
 }
 
@@ -126,7 +139,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-from decouple import config
+
 GEMINI_API_KEY = config('GEMINI_API_KEY')
 AAI_API_KEY = config('AAI_API_KEY')
 
@@ -171,11 +184,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
 # SMTP server details from environment variables
-EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-CONTACT_EMAIL = os.getenv('CONTACT_EMAIL')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = int(config('EMAIL_PORT', 587))
+EMAIL_USE_TLS = config('EMAIL_USE_TLS') == 'True'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+CONTACT_EMAIL = config('CONTACT_EMAIL')
 
 

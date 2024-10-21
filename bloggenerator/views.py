@@ -2,6 +2,7 @@ import filetype
 import logging
 import os
 import json
+import lxml
 # from yt_dlp import YoutubeDL
 from youtube_dl import YoutubeDL
 from django.contrib.auth.models import User
@@ -22,6 +23,12 @@ from django.shortcuts import render
 import google.generativeai as genai
 from .models import BlogPost
 from django.shortcuts import get_object_or_404
+from yt_dlp import YoutubeDL
+import os
+import logging
+from django.conf import settings
+import time  # Import time module for generating unique timestamps
+
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -58,7 +65,7 @@ def contact(request):
             email_message.send()
             return JsonResponse({'message': f'Thank you, {name}! Your message has been sent.'})
         except Exception as e:
-            print(f"Error sending email: {e}")
+            # print(f"Error sending email: {e}")
             return JsonResponse({'error': 'Something went wrong. If this persists, try sending your email to "epheynyaga@gmail.com". Sorry for the inconvenience.'}, status=500)
 
     # Render the contact page and pass the user's email
@@ -181,14 +188,21 @@ def extract_audio_from_video(video_path):
         logging.error(f"Error extracting audio from video: {e}", exc_info=True)
         return None
 
+import requests
+from bs4 import BeautifulSoup
+import logging
+
 def yt_title(link):
     try:
-        yt = YouTube(link)
-        title = yt.title
-        return title
+        response = requests.get(link)
+        # Corrected 'lmxl.parser' to 'lxml'
+        soup = BeautifulSoup(response.text, 'lxml')  # or 'html.parser' if you prefer
+        title = soup.find("title").text
+        return title.replace(" - YouTube", "").strip()
     except Exception as e:
-        logging.error(f"Error fetching YouTube title for link {link}: {e}")
+        # logging.error(f"Error fetching YouTube title for link {link}: {e}")
         return None
+
     
 
 # def convert_youtube_url_to_mp3(youtube_url: str, destination: str = BASE_DIR / 'music/') -> File:
@@ -209,42 +223,41 @@ def yt_title(link):
 #     return audio
 
 
+
 def download_audio(link):
     try:
-        # YouTube-DL options
         ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': 'media/%(title)s.%(ext)s',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
+            'format': 'bestaudio/best',  # Choose the best available audio format
+            'outtmpl': os.path.join(settings.MEDIA_ROOT, '%(title)s.%(ext)s'),  # Template for output filename
             'retries': 5,
-            'noplaylist': True,
-            'proxy': 'https://211.104.20.205:8080',  # Example proxy
+            'timeout': 60,
+            'quiet': True,
+            'no_warnings': True,
         }
 
         with YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # Download audio
+            info_dict = ydl.extract_info(link, download=True)
             file_path = ydl.prepare_filename(info_dict)
+
+            # Extract base filename and extension
             base, ext = os.path.splitext(file_path)
-            new_file = base + '.mp3'  # Change extension to .webm
+            new_file = base + ext
 
-            # Rename file if it already exists
+            # Ensure the filename is unique
             if os.path.exists(new_file):
-                base = f"{base}_{info_dict['id']}"
-                new_file = base + '.mp3'
+                # Append a timestamp to the filename to ensure uniqueness
+                timestamp = int(time.time())  # Get the current time as a unique identifier
+                new_file = f"{base}_{timestamp}{ext}"
 
-            os.rename(file_path, new_file)  # Rename the downloaded file
-            logging.info(f"File renamed successfully to: {new_file}")
+            # Rename or move the downloaded file to the new filename
+            os.rename(file_path, new_file)
+            # logging.info(f"File renamed successfully: {new_file}")
 
         return new_file
 
     except Exception as e:
-        logging.error(f"Error downloading audio from {link}: {e}", exc_info=True)
+        # logging.error(f"Error in download_audio function: {e}", exc_info=True)
         return None
-
 
 def save_file(file):
     file_name = file.name
@@ -266,11 +279,11 @@ def get_transcription(link):
         return transcript.text
 
     except Exception as e:
-        logging.error(f"Error in get_transcription function: {e}", exc_info=True)
+        # logging.error(f"Error in get_transcription function: {e}", exc_info=True)
         return None
     
 MAX_RETRIES = 5
-RETRY_DELAY = 5 
+RETRY_DELAY = 60 
     
 def get_transcription_from_file(file_path):
     def transcribe_with_retries():
@@ -281,20 +294,20 @@ def get_transcription_from_file(file_path):
                     transcript = transcriber.transcribe(audio_file)
                 return transcript.text
             except httpx.WriteTimeout:
-                logging.warning(f"Write timeout, retrying ({attempt + 1}/{MAX_RETRIES})...")
+                # logging.warning(f"Write timeout, retrying ({attempt + 1}/{MAX_RETRIES})...")
                 time.sleep(RETRY_DELAY)
             except Exception as e:
-                logging.error(f"Error during transcription attempt {attempt + 1}: {e}", exc_info=True)
+                # logging.error(f"Error during transcription attempt {attempt + 1}: {e}", exc_info=True)
                 if attempt == MAX_RETRIES - 1:
                     raise  # Re-raise the exception if all retries are exhausted
                 time.sleep(RETRY_DELAY)
 
-        logging.error("Failed to get transcription after several retries.")
+        # logging.error("Failed to get transcription after several retries.")
         return None
 
     try:
         if not os.path.exists(file_path):
-            logging.error(f"File not found: {file_path}")
+            # logging.error(f"File not found: {file_path}")
             return None
 
         # Set the API key for the transcriber
@@ -306,7 +319,7 @@ def get_transcription_from_file(file_path):
         return transcript_text
 
     except Exception as e:
-        logging.error(f"Error in get_transcription_from_file function: {e}", exc_info=True)
+        # logging.error(f"Error in get_transcription_from_file function: {e}", exc_info=True)
         return None
 def generate_blog_from_transcription(transcription):
     def generate_with_retries():
@@ -317,12 +330,20 @@ def generate_blog_from_transcription(transcription):
                     transcription_text,
                     generation_config=generation_config
                 )
-                logging.info(f"Generation attempt {attempt + 1}/{MAX_RETRIES}: Response received.")
-                
+                # logging.info(f"Generation attempt {attempt + 1}/{MAX_RETRIES}: Response received.")
+                # logging.info(f"Response content: {response}")
+
+                # Check for prompt feedback
+                if hasattr(response, 'prompt_feedback') and response.prompt_feedback:
+                    block_reason = response.prompt_feedback.block_reason
+                    if block_reason and block_reason != "OTHER":
+                        # logging.error(f"Content generation blocked. Reason: {block_reason}")
+                        return f"Content could not be generated. Reason: {block_reason}"
+
                 if hasattr(response, 'candidates') and response.candidates:
                     candidate = response.candidates[0]
                     if candidate.finish_reason == "SAFETY":
-                        logging.error("Content generation blocked due to safety concerns.")
+                        # logging.error("Content generation blocked due to safety concerns.")
                         return "The content could not be generated as it was flagged for safety concerns."
                     elif hasattr(candidate, 'content') and candidate.content.parts:
                         generated_content = ''.join([part.text for part in candidate.content.parts])
@@ -333,30 +354,20 @@ def generate_blog_from_transcription(transcription):
                     logging.error("The response does not contain valid 'candidates'.")
                 
             except Exception as e:
-                logging.error(f"Error during generation attempt {attempt + 1}: {e}", exc_info=True)
+                # logging.error(f"Error during generation attempt {attempt + 1}: {e}", exc_info=True)
                 if attempt == MAX_RETRIES - 1:
                     raise
                 time.sleep(RETRY_DELAY)
 
-        logging.error("Failed to generate content after several retries.")
+        # logging.error("Failed to generate content after several retries.")
         return "Content could not be generated due to repeated failures. Please try again later."
 
     try:
         gemini_api_key = settings.GEMINI_API_KEY 
         genai.configure(api_key=gemini_api_key)
-        print(transcription)
-
-        transcription_text = f"""
-        Create a blog article from the provided transcript:
-
-        {transcription}
-        Structure the article as follows:
-        1. Introduction: Briefly introduce the main topic or theme of the discussion.
-        2. Body: Summarize the content based on timestamps.
-        3. Conclusion: Summarize the key takeaways from the discussion.
-        Format: Use clear headings and subheadings for different timestamps. 
-        Write in an engaging and professional tone.
-        """
+        
+        # Simplified transcription input
+        transcription_text = f"Create a blog article from this transcript: {transcription}"
 
         model = genai.GenerativeModel('gemini-1.5-flash')
 
@@ -372,7 +383,7 @@ def generate_blog_from_transcription(transcription):
         return generated_content
 
     except Exception as e:
-        logging.error(f"Error in generate_blog_from_transcription function: {e}", exc_info=True)
+        # logging.error(f"Error in generate_blog_from_transcription function: {e}", exc_info=True)
         return None
 
 @login_required
@@ -386,6 +397,7 @@ def blog_details(request,pk):
         return render(request,'blogdetails.html',{'blog_article_detail':blog_article_detail})
     else:
         return redirect('/')
+    
 
 def user_login(request):
     if request.method == 'POST':
