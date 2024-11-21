@@ -93,28 +93,27 @@ WSGI_APPLICATION = 'aiblog_app.wsgi.application'
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('POSTGRES_DATABASE'),        # Fetch from .env file
-#         'USER': config('POSTGRES_USER'),            # Fetch from .env file
-#         'PASSWORD': config('POSTGRES_PASSWORD'),    # Fetch from .env file
-#         'HOST': config('POSTGRES_HOST'),            # Fetch from .env file
-#         'PORT': config('POSTGRES_PORT'), 
-        
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config("DB_NAME"),  # Replace with your database name
-        'USER': config("DB_USER"),  # Replace with your database user
-        'PASSWORD': config("DB_PASSWORD"),  # Replace with your database password
-        'HOST': config("DB_HOST"),  # Replace with your database host (e.g., 'localhost' or an IP address)
-        'PORT': '3306',  # Default MySQL port is 3306
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DATABASE'),        # Fetch from .env file
+        'USER': config('POSTGRES_USER'),            # Fetch from .env file
+        'PASSWORD': config('POSTGRES_PASSWORD'),    # Fetch from .env file
+        'HOST': config('POSTGRES_HOST'),            # Fetch from .env file
+        
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': config("DB_NAME"),  # Replace with your database name
+#         'USER': config("DB_USER"),  # Replace with your database user
+#         'PASSWORD': config("DB_PASSWORD"),  # Replace with your database password
+#         'HOST': config("DB_HOST"),  # Replace with your database host (e.g., 'localhost' or an IP address)
+#         'PORT': '3306',  # Default MySQL port is 3306
+#     }
+# }
 
 
 # Password validation
